@@ -22,7 +22,7 @@ import { TaskTicker } from "./TaskTicker";
 
 export default function ActivityConsole() {
   const dispatch = useAppDispatch();
-  const { isConnected } = useTaskFeed(); // Activate the live stream feed socket
+  const { isConnected } = useTaskFeed(); 
   
   const tasks = useAppSelector(selectFilteredAndSortedTasks);
   const filters = useAppSelector(selectTasksFilters);
@@ -32,7 +32,6 @@ export default function ActivityConsole() {
 
   const [isCacheLoaded, setIsCacheLoaded] = useState(false);
 
-  // 1. Initial boot: Hydrate from IndexedDB immediately, then query fresh server logs
   useEffect(() => {
     async function prepareState() {
       const cached = await loadTasksFromCache();
@@ -40,13 +39,11 @@ export default function ActivityConsole() {
         dispatch(hydrateFromCache(cached.tasks));
         setIsCacheLoaded(true);
       }
-      // Revalidate records from the server in the background
       dispatch(fetchTasksPage({ page: metadata.currentPage, pageSize: metadata.pageSize }));
     }
     prepareState();
   }, [dispatch]);
 
-  // Fetch a new page whenever the pagination parameters change
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > Math.ceil(metadata.totalItems / metadata.pageSize)) return;
     dispatch(setCurrentPage(newPage));
@@ -54,37 +51,33 @@ export default function ActivityConsole() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6 max-w-[1600px] mx-auto min-h-screen bg-black text-gray-100 antialiased">
-      
-      {/* LEFT GRID: Main Datatable Matrix Workspace */}
-      <div className="lg:col-span-2 space-y-4 flex flex-col">
+    <div className="bg-white relative min-h-screen antialiased p-6 max-w-[1600px] overflow-x-hidden">
+
+      {/* MAIN CONTENT WORKSPACE: Takes up full width */}
+      <div className="space-y-4 flex flex-col w-full transition-all duration-300">
         
         {/* HEADER BRANDING CARD */}
-        <div className="bg-gray-900 border border-gray-800 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white font-sans">Annotation Activity Console</h1>
-            <p className="text-xs text-gray-400 mt-0.5">Strict Typed State Infrastructure Operational Panel</p>
+            <h1 className="text-3xl font-bold tracking-tight text-neutral-900 font-sans">Annotation Activity Console</h1>
           </div>
           
-          {/* NETWORKS INTERACTIVE SIGNALS */}
           <div className="flex items-center gap-3 text-xs font-mono">
             {isCacheLoaded && metadata.loading && (
               <span className="px-2 py-1 rounded bg-yellow-950 text-yellow-400 border border-yellow-800 text-[11px] animate-pulse">
-                Revalidating Server Logs...
+                Loading...
               </span>
             )}
-            <div className={`flex items-center gap-2 px-2.5 py-1 rounded border ${isConnected ? "bg-green-950/40 text-green-400 border-green-800" : "bg-red-950/40 text-red-400 border-red-800"}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${isConnected ? "bg-green-400 animate-pulse" : "bg-red-500"}`} />
-              WS: {isConnected ? "CONNECTED" : "DISCONNECTED"}
+            <div className={`flex items-center gap-2 px-2.5 py-2 rounded border ${isConnected ? "bg-green-950 text-white border-green-800 shadow-lg shadow-green-800 cursor-pointer" : "bg-red-950/40 text-red-400 border-red-800 shadow-lg shadow-red-800"}`}>
+              {isConnected ? "CONNECTED" : "DISCONNECTED"}
             </div>
           </div>
         </div>
-
         {/* SEARCH & FILTER CONTROLS HUB */}
-        <div className="bg-gray-900 border border-gray-800 p-4 rounded-lg grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="p-4 rounded-lg grid grid-cols-1 sm:grid-cols-3 gap-3">
           <input
             type="text"
-            placeholder="Search matching token ID or title..."
+            placeholder="Search ID or title..."
             value={filters.searchQuery}
             onChange={(e) => dispatch(setFilters({ searchQuery: e.target.value }))}
             className="bg-gray-950 text-sm border border-gray-800 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-600 transition"
@@ -94,7 +87,7 @@ export default function ActivityConsole() {
             onChange={(e) => dispatch(setFilters({ type: e.target.value }))}
             className="bg-gray-950 text-sm border border-gray-800 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-600 cursor-pointer"
           >
-            <option value="all">Filter Type: All Formats</option>
+            <option value="all">All</option>
             <option value="image">Image Vectors</option>
             <option value="audio">Audio Waveforms</option>
             <option value="text">Text Logs</option>
@@ -105,7 +98,7 @@ export default function ActivityConsole() {
             onChange={(e) => dispatch(setFilters({ status: e.target.value }))}
             className="bg-gray-950 text-sm border border-gray-800 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-600 cursor-pointer"
           >
-            <option value="all">Filter Status: All Blocks</option>
+            <option value="all">All</option>
             <option value="todo">To Do</option>
             <option value="in_progress">In Progress</option>
             <option value="qa">Quality Assurance</option>
@@ -115,13 +108,13 @@ export default function ActivityConsole() {
         </div>
 
         {/* TASK MATRIX DATA-TABLE PANEL */}
-        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden flex-1 flex flex-col justify-between">
+        <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden flex flex-col justify-between">
           <div className="overflow-x-auto min-h-100">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
                 <tr className="bg-gray-950 border-b border-gray-800 font-mono text-xs text-gray-400 uppercase">
-                  <th className="p-3">Identifier</th>
-                  <th className="p-3">Task Meta Title</th>
+                  <th className="p-3">Task ID</th>
+                  <th className="p-3">Task Title</th>
                   <th className="p-3 cursor-pointer hover:text-white transition" onClick={() => dispatch(setSorting({ sortBy: "annotationCount", sortOrder: sorting.sortOrder === "desc" ? "asc" : "desc" }))}>
                     Annotations {sorting.sortBy === "annotationCount" ? (sorting.sortOrder === "desc" ? "▼" : "▲") : "↕"}
                   </th>
@@ -135,13 +128,13 @@ export default function ActivityConsole() {
                 {metadata.loading && tasks.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center p-12 text-gray-500 italic font-mono">
-                      Requesting server frame packets...
+                      Loading...
                     </td>
                   </tr>
                 ) : tasks.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center p-12 text-gray-500 italic font-mono">
-                      No contextual tasks match current query descriptors.
+                      No task found
                     </td>
                   </tr>
                 ) : (
@@ -154,7 +147,7 @@ export default function ActivityConsole() {
                       <td className="p-3 font-mono text-xs text-blue-400 font-bold">{task.id}</td>
                       <td className="p-3 font-medium text-white max-w-50 truncate">{task.title}</td>
                       <td className="p-3 font-mono text-green-400 font-semibold">{task.annotationCount}</td>
-                      <td className="p-3 text-gray-300 text-xs">{task.assignee ? task.assignee.name : <span className="text-gray-600 italic">Open Queue</span>}</td>
+                      <td className="p-3 text-gray-300 text-xs">{task.assignee ? task.assignee.name : <span className="text-gray-600 italic">Not available</span>}</td>
                       <td className="p-3 font-mono text-xs text-gray-400">{new Date(task.updatedAt).toLocaleTimeString()}</td>
                     </tr>
                   ))
@@ -185,12 +178,14 @@ export default function ActivityConsole() {
           </div>
         </div>
 
-        {/* CLEANED TEAM TICKER PULSE INJECTOR */}
-        <TaskTicker apiBase="http://localhost:4000" />
+        <TaskTicker apiBase="http://localhost:4000" selectedTaskId={selectedTask?.id || null} />
       </div>
 
-      {/* RIGHT GRID: Master Detail Target Stream Viewer Panel */}
-      <div className="h-full">
+      <div 
+        className={`fixed top-0 right-0 h-full w-112.5 max-w-full bg-gray-900 border-l border-gray-800 shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+          selectedTask ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
         <DetailPanel task={selectedTask} />
       </div>
     </div>
