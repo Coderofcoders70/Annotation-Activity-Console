@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, createEntityAdapter, createSelector, PayloadAction } from "@reduxjs/toolkit";
 import { NormalizedTask, normalizeTask, TaskStatus } from "../utils/normalize";
+import { saveTasksToCache } from "../services/cacheService";
 
 // Setup the high-performance Entity Adapter
 export const tasksAdapter = createEntityAdapter<NormalizedTask>({
@@ -15,8 +16,8 @@ export interface TasksState extends ReturnType<typeof tasksAdapter.getInitialSta
   error: string | null;
   selectedTaskId: string | null;
   filters: {
-    type: string; 
-    status: string; 
+    type: string;
+    status: string;
     searchQuery: string;
   };
   sorting: {
@@ -53,10 +54,10 @@ export const fetchTasksPage = createAsyncThunk(
         throw new Error(`HTTP error code status: ${response.status}`);
       }
       const data = await response.json();
-      
+
       // Normalize raw payload arrays immediately at the boundary
       const normalizedItems = data.items.map((rawItem: any) => normalizeTask(rawItem));
-      
+
       return {
         items: normalizedItems,
         total: data.total,
@@ -131,14 +132,22 @@ const tasksSlice = createSlice({
         state.totalItems = action.payload.total;
         state.currentPage = action.payload.page;
         state.pageSize = action.payload.pageSize;
-        // setAll wipes old paginated views cleanly and swaps in fresh entities
+
+        // Update internal Redux adapter state
         tasksAdapter.setAll(state, action.payload.items);
+
+        // Background Cache writing trigger (Fires asynchronously without blocking components)
+        saveTasksToCache(action.payload.items, {
+          totalItems: action.payload.total,
+          currentPage: action.payload.page,
+          pageSize: action.payload.pageSize
+        });
       })
       .addCase(fetchTasksPage.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
-    },
+  },
 });
 
 export const {
