@@ -91,7 +91,7 @@ export default function DetailPanel({ task }: DetailPanelProps) {
     };
   }, [task]);
 
-  // If no task selected, let the outer container handle its transition natively off-screen safely
+  // If no task selected outer container handle its transition natively off-screen safely
   if (!task) return null;
 
   const parsedMarkdownHtml = marked.parse(summary) as string;

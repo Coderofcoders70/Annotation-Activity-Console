@@ -51,10 +51,10 @@ export default function ActivityConsole() {
   };
 
   return (
-    <div className="bg-white relative min-h-screen antialiased p-6 max-w-[1600px] overflow-x-hidden">
+    <div className="bg-white relative min-h-screen antialiased p-6 max-w-full  overflow-x-hidden">
 
       {/* MAIN CONTENT WORKSPACE: Takes up full width */}
-      <div className="space-y-4 flex flex-col w-full transition-all duration-300">
+      <div className="max-w-7xl mx-auto space-y-4 flex flex-col w-full transition-all duration-300">
         
         {/* HEADER BRANDING CARD */}
         <div className="p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -73,6 +73,7 @@ export default function ActivityConsole() {
             </div>
           </div>
         </div>
+
         {/* SEARCH & FILTER CONTROLS HUB */}
         <div className="p-4 rounded-lg grid grid-cols-1 sm:grid-cols-3 gap-3">
           <input
@@ -106,6 +107,8 @@ export default function ActivityConsole() {
             <option value="blocked">Blocked Entries</option>
           </select>
         </div>
+
+        <TaskTicker apiBase="http://localhost:4000" selectedTaskId={selectedTask?.id || null} />
 
         {/* TASK MATRIX DATA-TABLE PANEL */}
         <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden flex flex-col justify-between">
@@ -157,11 +160,11 @@ export default function ActivityConsole() {
           </div>
 
           {/* SERVER PAGINATION ACTION CONTROL FEET */}
-          <div className="bg-gray-950 border-t border-gray-800 p-3 flex items-center justify-between text-xs font-mono">
+          <div className="bg-gray-950 border-t border-gray-800 p-3 flex gap-2 items-center justify-between text-xs font-mono">
             <button
               disabled={metadata.currentPage === 1 || metadata.loading}
               onClick={() => handlePageChange(metadata.currentPage - 1)}
-              className="px-3 py-1.5 rounded bg-gray-900 border border-gray-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 transition"
+              className="px-1 py-1.5 rounded bg-gray-900 border border-gray-800 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 transition"
             >
               ◀ Previous Page
             </button>
@@ -177,8 +180,6 @@ export default function ActivityConsole() {
             </button>
           </div>
         </div>
-
-        <TaskTicker apiBase="http://localhost:4000" selectedTaskId={selectedTask?.id || null} />
       </div>
 
       <div 
