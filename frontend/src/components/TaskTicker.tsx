@@ -54,7 +54,7 @@ export function TaskTicker({ apiBase, selectedTaskId }: { apiBase: string; selec
     <div className="p-4 bg-gray-950 border border-gray-800 rounded-lg max-h-[30vh] overflow-y-auto">
       <h3 className="text-xs font-mono uppercase tracking-wider text-gray-400 mb-2">Live Recent Activity Ticker</h3>
       {sorted.length === 0 ? (
-        <p className="text-xs text-gray-500 italic">No tasks recently clicked yet.</p>
+        <p className="mt-4 text-xs text-gray-500 italic">No tasks recently clicked yet.</p>
       ) : (
         <ul className="space-y-1.5">
           {sorted.map((t) => (
